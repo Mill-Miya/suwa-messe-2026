@@ -202,7 +202,8 @@ a{color:var(--accent);text-decoration-thickness:1px;text-underline-offset:4px}
 
 /* Compact, spatially approximate independent booth guide; not a tracing of the organizer's artwork */
 .guide-board{display:block;padding:0 16px 20px;background:#f6f7f2}
-.guide-board .guide-map{display:block;width:100%;height:auto;background:#fbfcf8;border:1px solid var(--line);border-radius:2px;touch-action:pan-x pan-y}
+.guide-board .guide-map{display:block;width:100%;height:auto;background:#fbfcf8;border:1px solid var(--line);border-radius:2px;touch-action:pan-y}
+.guide-board .guide-map.zoomed{touch-action:none}
 .guide-map-grid{fill:none;stroke:#dce5da;stroke-width:.75;opacity:.42;pointer-events:none}
 .guide-pin{cursor:pointer;outline:none}
 .guide-pin rect{fill:#fff;stroke:#aebbb1;stroke-width:1.1}
@@ -420,6 +421,7 @@ const guide=$('guide-dialog');
 const areaDef=()=>GUIDE_AREAS.find(a=>a.id===GUIDE.area);
 function guidePick(area,booth){
   if(!GUIDE_AREAS.some(a=>a.id===area))return;
+  if(GUIDE.area!==area){GUIDE.zoom=1;GUIDE.centerX=460;GUIDE.centerY=405;}
   GUIDE.area=area;
   const a=Array.from(BOOTHS.keys()).filter(k=>k.startsWith(area+':')).map(k=>Number(k.split(':')[1])).sort((x,y)=>x-y);
   GUIDE.booth=booth&&BOOTHS.has(boothKey(area,booth))?Number(booth):a[0];
@@ -439,7 +441,10 @@ function boardView(){
 }
 function boardViewport(){
   const svg=$('guide-board').querySelector('svg');
-  if(svg)svg.setAttribute('viewBox',boardView().map(x=>x.toFixed(2)).join(' '));
+  if(svg){
+    svg.setAttribute('viewBox',boardView().map(x=>x.toFixed(2)).join(' '));
+    svg.classList.toggle('zoomed',GUIDE.zoom>1);
+  }
 }
 function focusBooth(n){const first=BOOTHS.get(boothKey(GUIDE.area,n))?BOOTH_POS[n-1][0]:null;if(first){GUIDE.centerX=first[0];GUIDE.centerY=first[1];}}
 function guideRender(){
@@ -456,7 +461,7 @@ function guideRender(){
         '</g>';
     });
   });
-  $('guide-board').innerHTML='<svg class="guide-map" viewBox="'+boardView().map(v=>v.toFixed(2)).join(' ')+'" xmlns="http://www.w3.org/2000/svg" aria-label="'+areaDef().name+'の番号配置模式図">'+
+  $('guide-board').innerHTML='<svg class="guide-map '+(GUIDE.zoom>1?'zoomed':'')+'" viewBox="'+boardView().map(v=>v.toFixed(2)).join(' ')+'" xmlns="http://www.w3.org/2000/svg" aria-label="'+areaDef().name+'の番号配置模式図">'+
     '<rect x="0" y="0" width="920" height="810" fill="#fbfcf8"></rect>'+pins.join('')+'</svg>';
   const list=BOOTHS.get(boothKey(GUIDE.area,GUIDE.booth))||[];
   const heading=areaDef().name+' '+String(GUIDE.booth).padStart(3,'0')+'番';
@@ -473,6 +478,27 @@ function boardZoom(factor){
 $('map-zoom-in').addEventListener('click',()=>boardZoom(1.55));
 $('map-zoom-out').addEventListener('click',()=>boardZoom(1/1.55));
 $('map-zoom-reset').addEventListener('click',()=>{GUIDE.zoom=1;GUIDE.centerX=460;GUIDE.centerY=405;boardViewport();});
+
+// Drag only the background of a zoomed map; keep booth tap targets available.
+let boardDrag=null;
+$('guide-board').addEventListener('pointerdown',e=>{
+  if(GUIDE.zoom<=1||e.target.closest('[data-guide-booth]'))return;
+  const svg=$('guide-board').querySelector('svg');
+  if(!svg)return;
+  boardDrag={id:e.pointerId,x:e.clientX,y:e.clientY,cx:GUIDE.centerX,cy:GUIDE.centerY,width:svg.getBoundingClientRect().width};
+  if(svg.setPointerCapture)svg.setPointerCapture(e.pointerId);
+});
+$('guide-board').addEventListener('pointermove',e=>{
+  if(!boardDrag||e.pointerId!==boardDrag.id)return;
+  const scale=(920/GUIDE.zoom)/Math.max(1,boardDrag.width);
+  GUIDE.centerX=boardDrag.cx-(e.clientX-boardDrag.x)*scale;
+  GUIDE.centerY=boardDrag.cy-(e.clientY-boardDrag.y)*scale;
+  boardViewport();
+});
+for(const eventName of ['pointerup','pointercancel']){
+  $('guide-board').addEventListener(eventName,()=>{boardDrag=null;});
+}
+
 $('guide-board').addEventListener('keydown',e=>{
  const el=e.target.closest('[data-guide-booth]');if(!el)return;
  if(e.key==='Enter'||e.key===' '){e.preventDefault();guidePick(GUIDE.area,Number(el.dataset.guideBooth));}
@@ -480,9 +506,10 @@ $('guide-board').addEventListener('keydown',e=>{
 
 function openGuide(r){
   const area=r?areaOf(r):GUIDE.area,booth=r?Number(r.booth):GUIDE.booth;
+  guidePick(area,booth);
   GUIDE.zoom=r?2:1;GUIDE.centerX=460;GUIDE.centerY=405;
   if(r)focusBooth(Number(r.booth));
-  guidePick(area,booth);
+  boardViewport();
   if(typeof guide.showModal==='function'){if(!guide.open)guide.showModal();}
   else{guide.setAttribute('open','');} // fallback if dialog API is absent
   if(r){const current=$('guide-board').querySelector('.is-current');if(current)current.scrollIntoView({block:'nearest'});}
