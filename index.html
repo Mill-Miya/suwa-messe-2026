@@ -199,6 +199,33 @@ a{color:var(--accent);text-decoration-thickness:1px;text-underline-offset:4px}
 .guide-foot{flex-direction:column;align-items:flex-start;padding:14px}
 }
 @media(max-width:360px){.guide-tiles{grid-template-columns:repeat(5,minmax(0,1fr))}}
+
+/* Compact, spatially approximate independent booth guide; not a tracing of the organizer's artwork */
+.guide-board{display:block;padding:0 16px 20px;background:#f6f7f2}
+.guide-board .guide-map{display:block;width:100%;height:auto;background:#fbfcf8;border:1px solid var(--line);border-radius:2px;touch-action:pan-x pan-y}
+.guide-map-grid{fill:none;stroke:#dce5da;stroke-width:.75;opacity:.42;pointer-events:none}
+.guide-pin{cursor:pointer;outline:none}
+.guide-pin rect{fill:#fff;stroke:#aebbb1;stroke-width:1.1}
+.guide-pin text{fill:#3c4a40;font-family:-apple-system,BlinkMacSystemFont,sans-serif;font-weight:650;font-size:10.5px;text-anchor:middle;dominant-baseline:central;pointer-events:none;user-select:none}
+.guide-pin.priority rect{stroke:#4f8870;stroke-width:2}
+.guide-pin.visited rect{fill:#dbeddf;stroke:#67a37c}
+.guide-pin.current rect{fill:#c44935;stroke:#c44935;stroke-width:2}
+.guide-pin.current text{fill:#fff;font-weight:900}
+.guide-pin:focus-visible rect{stroke:#cc7a2d;stroke-width:3}
+.guide-pin .dot{fill:#c44935;pointer-events:none}
+.guide-map-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 16px;border-bottom:1px solid var(--line);background:#fff}
+.guide-map-bar span{font-size:12px;color:var(--muted);line-height:1.5}
+.guide-map-ctrl{display:flex;gap:5px;align-items:center}
+.guide-map-ctrl button{min-width:44px;min-height:44px;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:2px;font-size:13px;font-weight:750;padding:7px 9px}
+.guide-map-ctrl button:hover{background:var(--accent-soft)}
+.guide-caution strong{font-weight:800}
+@media(max-width:680px){
+.guide-board{padding:0 8px 14px}
+.guide-map-bar{padding:7px 9px;flex-wrap:wrap}
+.guide-map-bar span{font-size:11px}
+.guide-map-ctrl{margin-left:auto}
+.guide-map-ctrl button{min-height:40px;min-width:40px}
+}
 </style>
 </head>
 <body>
@@ -219,10 +246,11 @@ a{color:var(--accent);text-decoration-thickness:1px;text-underline-offset:4px}
   <div><div class="eyebrow">BOOTH INDEX / 2026</div><h2 id="guide-title">ブース番号案内</h2></div>
   <button id="guide-close" class="guide-close" type="button" aria-label="案内図を閉じる">閉じる ×</button>
  </div>
- <p class="guide-caution"><strong>独自の番号索引です。</strong>実際のブース配置・通路・方角を表した地図ではありません。正確な位置は公式マップで確認してください。</p>
+ <p class="guide-caution"><strong>独自の配置模式図です。</strong>ブース番号の大まかな位置関係だけを表示します。縮尺・通路・壁・方角は正確ではありません。移動時は公式マップを確認してください。</p>
  <nav class="guide-floors" id="guide-floors" aria-label="案内する体育館・階"></nav>
  <section class="guide-selected" id="guide-selected" aria-live="polite"></section>
- <div class="guide-board" id="guide-board"></div>
+ <div class="guide-map-bar"><span id="guide-map-hint">番号を選ぶと企業を表示／拡大して位置を確認</span><div class="guide-map-ctrl"><button id="map-zoom-out" type="button" aria-label="配置図を縮小">−</button><button id="map-zoom-reset" type="button">全体</button><button id="map-zoom-in" type="button" aria-label="配置図を拡大">＋</button></div></div>
+<div class="guide-board" id="guide-board"></div>
  <section class="guide-compass" aria-label="方角を確認">
   <div class="guide-compass-info"><h3>方角の確認</h3><p>スマートフォンの<strong>上辺</strong>が向く方角を表示します。位置情報は取得しません。</p><button id="compass-start" type="button">方角センサーを使う</button><p id="compass-status" role="status">端末の許可が必要な場合があります。</p></div>
   <div class="compass-visual"><div class="compass-ring"><div id="compass-north" class="compass-north">N <span>▲</span></div><div class="compass-dot"></div></div><strong id="compass-degree">—°</strong><span id="compass-direction">未取得</span></div>
@@ -397,27 +425,63 @@ function guidePick(area,booth){
   GUIDE.booth=booth&&BOOTHS.has(boothKey(area,booth))?Number(booth):a[0];
   guideRender();
 }
+
+/* Number positions are simplified point coordinates only; no floor-outline or source artwork. */
+const POS_RAW='808,637|807,589|807,539|807,491|807,441|807,335|807,286|807,237|807,188|807,139|743,48|692,48|643,48|594,48|519,48|289,48|166,48|704,148|656,148|606,148|532,169|399,148|351,148|301,148|251,148|203,148|704,188|656,188|606,188|399,188|351,188|301,188|251,188|203,188|703,285|655,285|605,285|556,285|507,285|398,286|350,286|300,286|251,286|202,286|703,325|655,325|605,325|556,325|507,325|324,325|202,325|702,447|654,447|604,447|555,447|506,447|372,446|299,446|250,446|201,446|702,486|654,486|604,486|530,486|397,486|349,486|299,486|250,486|201,486|703,586|655,586|605,586|556,586|507,586|398,586|350,586|300,586|251,586|202,586|703,625|655,625|605,625|556,625|507,625|398,625|350,625|300,625|251,625|202,625|741,722|692,722|643,722|594,722|545,722|496,722|387,722|338,722|289,722|191,722|97,677|98,628|97,530|97,387|97,338|97,289|97,240|97,191|97,117|775,781|718,781|661,781|604,781|547,781|490,781|433,781|376,781|319,781|262,781|56,637|56,556|58,476|56,395|56,314|56,233|56,152|56,71|383,501|394,468|406,434|417,400|429,367|441,333|470,249|441,114|407,102|374,91|340,79|305,67|272,56|238,44|204,33|399,180|349,163|316,151|280,139|247,127|213,116|407,213|373,201|340,190|306,178|271,166|238,155|204,143|382,284|349,272|315,261|282,249|246,237|213,226|180,214|373,311|339,300|306,288|272,277|237,264|204,253|170,241|349,381|315,370|282,358|248,347|213,335|157,331|339,409|288,391|219,367|282,467|179,432|112,409|288,500|41,495;170,459;160,536|279,576|28,432|40,398|51,365|89,254|137,116|154,65|558,443|611,289|622,256|741,249|832,280|863,325|851,359|681,281|710,291;742,302;772,312|673,305|702,315|733,326|764,336|659,345|688,355|720,366|750,376|780,387|651,369|680,379|711,390|741,401|772,411|637,410|666,420|697,430|728,441|758,451|629,434|658,444|689,455|719,465|749,475|615,474|644,484|675,495|705,505|736,516|606,498|636,508|667,519|697,529|727,540|593,539|622,549|653,559;683,570;713,580|584,563|613,573|645,584;675,594;705,605|549,613|586,626|623,639|660,651|697,664|754,641|768,600|804,497;790,538|818,455|835,406';
+const BOOTH_POS=POS_RAW.split('|').map(s=>s.split(';').map(t=>t.split(',').map(Number)));
+if(BOOTH_POS.length!==248)throw Error('ブース番号座標の不整合');
+GUIDE.zoom=1;GUIDE.centerX=460;GUIDE.centerY=405;
+const limit=(x,lo,hi)=>Math.max(lo,Math.min(hi,x));
+function boardView(){
+  const w=920/GUIDE.zoom,h=810/GUIDE.zoom;
+  const x=limit(GUIDE.centerX-w/2,0,920-w),y=limit(GUIDE.centerY-h/2,0,810-h);
+  return [x,y,w,h];
+}
+function boardViewport(){
+  const svg=$('guide-board').querySelector('svg');
+  if(svg)svg.setAttribute('viewBox',boardView().map(x=>x.toFixed(2)).join(' '));
+}
+function focusBooth(n){const first=BOOTHS.get(boothKey(GUIDE.area,n))?BOOTH_POS[n-1][0]:null;if(first){GUIDE.centerX=first[0];GUIDE.centerY=first[1];}}
 function guideRender(){
   $('guide-floors').innerHTML=GUIDE_AREAS.map(a=>'<button type="button" data-guide-area="'+a.id+'" class="'+(GUIDE.area===a.id?'active':'')+'" aria-pressed="'+(GUIDE.area===a.id)+'">'+a.name+'</button>').join('');
   const keys=[...BOOTHS.keys()].filter(k=>k.startsWith(GUIDE.area+':')).sort((a,b)=>Number(a.split(':')[1])-Number(b.split(':')[1]));
-  const chunks=[];for(let i=0;i<keys.length;i+=12)chunks.push(keys.slice(i,i+12));
-  $('guide-board').innerHTML=chunks.map(chunk=>{
-    const a=areaDef(),from=chunk[0].split(':')[1],to=chunk.at(-1).split(':')[1];
-    const tiles=chunk.map(key=>{
-      const num=Number(key.split(':')[1]),list=BOOTHS.get(key);
-      const cur=num===GUIDE.booth,visited=list.some(getVisited),prio=list.some(r=>P_MAP.has(r.id));
-      const classes=['guide-booth',cur?'is-current':'',visited?'is-visited':'',prio?'is-priority':''].filter(Boolean).join(' ');
-      return '<button type="button" class="'+classes+'" data-guide-booth="'+num+'" aria-pressed="'+cur+'" aria-label="'+a.name+' '+String(num).padStart(3,'0')+'番 '+list.length+'団体">'+String(num).padStart(3,'0')+'</button>';
-    }).join('');
-    return '<section class="guide-group"><h3>'+areaDef().prefix+' '+String(from).padStart(3,'0')+'〜'+String(to).padStart(3,'0')+'</h3><div class="guide-tiles">'+tiles+'</div></section>';
-  }).join('');
+  const pins=keys.flatMap(key=>{
+    const n=Number(key.split(':')[1]),companies=BOOTHS.get(key),current=n===GUIDE.booth;
+    const visited=companies.some(getVisited),priority=companies.some(r=>P_MAP.has(r.id));
+    const classes=['guide-pin',current?'current':'',visited?'visited':'',priority?'priority':''].filter(Boolean).join(' ');
+    return (BOOTHS_POS_FOR(n)).map(([x,y])=>{
+      return '<g class="'+classes+'" role="button" tabindex="0" data-guide-booth="'+n+'" aria-label="'+esc(areaDef().name)+' '+String(n).padStart(3,'0')+'番 '+companies.length+'件">'+
+        '<rect x="'+(x-13)+'" y="'+(y-9)+'" width="26" height="18" rx="1.5"></rect>'+
+        '<text x="'+x+'" y="'+y+'">'+String(n).padStart(3,'0')+'</text>'+
+        '</g>';
+    });
+  });
+  $('guide-board').innerHTML='<svg class="guide-map" viewBox="'+boardView().map(v=>v.toFixed(2)).join(' ')+'" xmlns="http://www.w3.org/2000/svg" aria-label="'+areaDef().name+'の番号配置模式図">'+
+    '<rect x="0" y="0" width="920" height="810" fill="#fbfcf8"></rect>'+pins.join('')+'</svg>';
   const list=BOOTHS.get(boothKey(GUIDE.area,GUIDE.booth))||[];
   const heading=areaDef().name+' '+String(GUIDE.booth).padStart(3,'0')+'番';
-  $('guide-selected').innerHTML='<h3>'+heading+'</h3><p>この番号の出展企業・団体 '+list.length+'件（番号索引／実際の位置は公式マップ参照）</p>'+
-     list.map(r=>'<button type="button" data-guide-company="'+r.id+'">'+esc(r.name)+(getVisited(r)?' ✓ 訪問済':'')+'</button>').join('');
+  $('guide-selected').innerHTML='<h3>'+heading+'</h3><p>この番号の出展企業・団体 '+list.length+'件。模式図の番号をタップして選択できます。</p>'+
+    list.map(r=>'<button type="button" data-guide-company="'+r.id+'">'+esc(r.name)+(getVisited(r)?' ✓ 訪問済':'')+'</button>').join('');
 }
+function BOOTHS_POS_FOR(n){return BOOTH_POS[n-1]||[];}
+function boardZoom(factor){
+  const z=limit(GUIDE.zoom*factor,1,4);
+  if(z===GUIDE.zoom)return;
+  if(GUIDE.zoom===1)focusBooth(GUIDE.booth);
+  GUIDE.zoom=z;boardViewport();
+}
+$('map-zoom-in').addEventListener('click',()=>boardZoom(1.55));
+$('map-zoom-out').addEventListener('click',()=>boardZoom(1/1.55));
+$('map-zoom-reset').addEventListener('click',()=>{GUIDE.zoom=1;GUIDE.centerX=460;GUIDE.centerY=405;boardViewport();});
+$('guide-board').addEventListener('keydown',e=>{
+ const el=e.target.closest('[data-guide-booth]');if(!el)return;
+ if(e.key==='Enter'||e.key===' '){e.preventDefault();guidePick(GUIDE.area,Number(el.dataset.guideBooth));}
+});
+
 function openGuide(r){
   const area=r?areaOf(r):GUIDE.area,booth=r?Number(r.booth):GUIDE.booth;
+  GUIDE.zoom=r?2:1;GUIDE.centerX=460;GUIDE.centerY=405;
+  if(r)focusBooth(Number(r.booth));
   guidePick(area,booth);
   if(typeof guide.showModal==='function'){if(!guide.open)guide.showModal();}
   else{guide.setAttribute('open','');} // fallback if dialog API is absent
