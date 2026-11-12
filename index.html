@@ -124,6 +124,7 @@ a{color:var(--accent);text-decoration-thickness:1px;text-underline-offset:4px}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
 
 /* Mobile field-use controls */
+@media(min-width:681px){.setting-buttons{grid-template-columns:repeat(5,minmax(0,1fr))}}
 .routebar{display:flex;align-items:center;gap:14px;border-bottom:1px solid var(--line);padding:11px 0 13px;color:var(--muted);font-size:12px;line-height:1.6}
 .routebar[hidden]{display:none}
 .route-label{display:inline-flex;align-items:center;gap:8px;min-height:44px;white-space:nowrap;font-size:13px;font-weight:750;color:var(--accent);cursor:pointer}
@@ -148,7 +149,7 @@ a{color:var(--accent);text-decoration-thickness:1px;text-underline-offset:4px}
 <div class="routebar" id="routebar"><label class="route-label"><input type="checkbox" id="route-order"> エリア順に並べる</label><span>東体育館の番号帯順 → 西体育館。最短経路ではありません。公式マップで通路を確認してください。</span></div>
 <div class="bar"><span id="count">企業を表示しています</span><span id="mode">訪問記録は端末内に保存</span></div>
 <section class="cards" id="cards" aria-live="polite"></section><button class="more" id="more" hidden>さらに表示</button>
-<section class="settings"><h2>記録のバックアップ</h2><p>訪問状況とメモは、この端末・このアプリ内に保存します。機種変更やブラウザのデータ削除に備えて、バックアップを保存してください。</p><div class="setting-buttons"><button id="backup">記録をバックアップ</button><label>バックアップを復元<input type="file" id="restore" accept=".json,application/json"></label><button id="csv">Excel用CSVを保存</button><button id="reset">記録を初期化</button></div><div class="hint">ホーム画面のショートカットから起動する場合は、毎回同じアイコンから開いてください。Safariとホーム画面版で記録の保存領域が分かれる場合があります。大切な記録はJSONバックアップを保存してください。通信不能時は前回読み込んだ企業一覧を表示できます（公式マップPDFは別途通信が必要）。</div></section>
+<section class="settings"><h2>記録のバックアップ</h2><p>訪問状況とメモは、この端末・このアプリ内に保存します。機種変更やブラウザのデータ削除に備えて、バックアップを保存してください。</p><div class="setting-buttons"><button id="refresh">最新版を読み込む</button><button id="backup">記録をバックアップ</button><label>バックアップを復元<input type="file" id="restore" accept=".json,application/json"></label><button id="csv">Excel用CSVを保存</button><button id="reset">記録を初期化</button></div><div class="hint">ホーム画面のショートカットから起動する場合は、毎回同じアイコンから開いてください。Safariとホーム画面版で記録の保存領域が分かれる場合があります。大切な記録はJSONバックアップを保存してください。通信不能時は前回読み込んだ企業一覧を表示できます（公式マップPDFは別途通信が必要）。</div></section>
 <footer class="foot">データ出典：提供された「諏訪圏工業メッセ2026｜見学管理表」。企業説明の一部には「要確認」の仮分類が含まれます。<a href="https://suwamesse.jp/exhibiting-list" target="_blank" rel="noopener">公式出展一覧 ↗</a>。画面は公式サイトではありません。</footer>
 </main><div id="toast" class="app-toast" role="status"></div>
 <script>
@@ -291,6 +292,7 @@ $('reset').addEventListener('click',()=>{
   if(!confirm('訪問状況とメモをすべて初期化します。復元したい場合は事前にバックアップしてください。続けますか？'))return;
   memory=emptyMemory();save();render();toast('記録を初期化しました');
 });
+$('refresh').addEventListener('click',async()=>{try{if('serviceWorker' in navigator){const reg=await navigator.serviceWorker.getRegistration();if(reg)await reg.update();}}catch(e){}window.location.reload();});
 if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){
   let refreshed=false;
   navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!refreshed){refreshed=true;location.reload();}});
