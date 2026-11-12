@@ -331,7 +331,7 @@ function card(r){
   '<div class="topline"><div>'+rank+esc(hall)+' ・ <span class="flag">'+esc(r.booth)+'番</span></div>'+
   '<span class="state '+stateClass+'">'+esc(state)+'</span></div>'+
   '<h2>'+esc(r.name)+badge+'</h2><div class="cat">'+esc(r.category)+(r.trust==='要確認'?' ・ 事業詳細は要確認':'')+'</div>'+
-  '<div class="desc">'+esc(r.description||'説明未登録')+'</div>'+extras+ '<button type="button" class="location-open" data-guide="'+r.id+'">ブース番号案内を見る</button>'
+  '<div class="desc">'+esc(r.description||'説明未登録')+'</div>'+extras+ '<button type="button" class="location-open" data-guide="'+r.id+'">ブース番号案内を見る</button>'+
   '<div class="actions"><button class="primary '+(v?'done':'')+'" data-action="visit" data-id="'+r.id+'" aria-pressed="'+v+'">'+(v?'✓ 訪問済み':'✓ 訪問済みにする')+'</button>'+
   '<button class="'+(re?'revisit-on':'')+'" data-action="revisit" data-id="'+r.id+'" aria-pressed="'+re+'">'+(re?'★ 再訪希望':'☆ 再訪')+'</button>'+
   '<button class="tertiary" data-action="skip" data-id="'+r.id+'" aria-pressed="'+sk+'">'+(sk?'見送り解除':'見送り')+'</button></div>'+
@@ -507,7 +507,7 @@ $('guide-board').addEventListener('keydown',e=>{
 function openGuide(r){
   const area=r?areaOf(r):GUIDE.area,booth=r?Number(r.booth):GUIDE.booth;
   guidePick(area,booth);
-  GUIDE.zoom=r?2:1;GUIDE.centerX=460;GUIDE.centerY=405;
+  GUIDE.zoom=1;GUIDE.centerX=460;GUIDE.centerY=405;
   if(r)focusBooth(Number(r.booth));
   boardViewport();
   if(typeof guide.showModal==='function'){if(!guide.open)guide.showModal();}
