@@ -1,5 +1,5 @@
-const CACHE="messe-2026-v4";
-const ASSETS=["./","./index.html","./manifest.webmanifest","./icon.svg"];
+const CACHE="messe-2026-v5";
+const ASSETS=["./","./index.html","./manifest.webmanifest","./icon.svg","./assets/brand/r-logo-black.svg"];
 self.addEventListener("install",event=>{
   event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting()));
 });
