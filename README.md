@@ -36,6 +36,6 @@ https://mill-miya.github.io/suwa-messe-2026/
 
 ## Creator
 
-<a href="https://github.com/Mill-Miya"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/brand/r-logo-white.svg"><img src="assets/brand/r-logo-black.svg" alt="Mill-Miya R logo" width="44"></picture></a>
+<a href="https://mill-miya.github.io/"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/brand/r-logo-white.svg"><img src="assets/brand/r-logo-black.svg" alt="Mill-Miya R logo" width="44"></picture></a>
 
 Created by [Mill-Miya](https://github.com/Mill-Miya). This is a personal field guide, not an official event application.
