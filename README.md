@@ -32,3 +32,10 @@ https://mill-miya.github.io/suwa-messe-2026/
 - [2026年公式出展一覧](https://suwamesse.jp/exhibiting-list)
 - [2026年公式フロアマップ](https://suwamesse.jp/wp2024/wp-content/uploads/2026/11/2026_floormap.pdf)
 - UI設計の参考：[Taste Skill](https://github.com/Leonxlnx/taste-skill)（原則を確認し、製品用途に合わせて適用。作者のリポジトリには変更なし）
+
+
+## Creator
+
+<a href="https://github.com/Mill-Miya"><picture><source media="(prefers-color-scheme: dark)" srcset="assets/brand/r-logo-white.svg"><img src="assets/brand/r-logo-black.svg" alt="Mill-Miya R logo" width="44"></picture></a>
+
+Created by [Mill-Miya](https://github.com/Mill-Miya). This is a personal field guide, not an official event application.
